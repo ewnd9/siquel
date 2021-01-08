@@ -1,0 +1,19 @@
+{
+  "name": "frontend",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start:dev": "snowpack dev"
+  },
+  "devDependencies": {
+    "@snowpack/plugin-dotenv": "^2.0.5",
+    "@snowpack/plugin-react-refresh": "^2.3.9",
+    "@snowpack/plugin-typescript": "^1.1.1",
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0",
+    "snowpack": "^2.18.5"
+  },
+  "dependencies": {
+    "socket.io-client": "^3.0.5"
+  }
+}
