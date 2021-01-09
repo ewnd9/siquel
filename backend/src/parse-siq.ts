@@ -1,9 +1,9 @@
 import Zip from 'jszip';
 import { parseString } from 'xml2js';
 import { v4 as uuid } from 'uuid';
+import { ParseSiqResult } from 'shared/src/state';
 
 import { promisify } from 'util';
-import { ParseSiqResult } from './types';
 
 const parseXml = promisify(parseString);
 

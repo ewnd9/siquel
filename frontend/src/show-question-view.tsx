@@ -1,6 +1,27 @@
 import React from 'react';
+import {
+  MetaView,
+  SHOW_QUESTION_VIEW_TYPE,
+  SHOW_QUESTION_ANSWERING_VIEW_TYPE,
+  SHOW_ANSWER_VIEW_TYPE,
+} from 'shared/src/state';
 
-export const ShowQuestionView = ({ io, meta, state, setState }) => {
+import { SetState, Socket } from './types';
+
+export const ShowQuestionView = ({
+  io,
+  meta,
+  state,
+  setState,
+}: {
+  io: Socket;
+  meta: MetaView;
+  state:
+    | SHOW_QUESTION_VIEW_TYPE
+    | SHOW_QUESTION_ANSWERING_VIEW_TYPE
+    | SHOW_ANSWER_VIEW_TYPE;
+  setState: SetState;
+}) => {
   const isSomeoneAnswering = state.type === 'SHOW_QUESTION_ANSWERING_VIEW';
   const showingAnswer = state.type === 'SHOW_ANSWER_VIEW';
 

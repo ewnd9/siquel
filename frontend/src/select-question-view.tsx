@@ -1,6 +1,17 @@
 import React from 'react';
+import { SELECT_QUESTION_VIEW_TYPE } from 'shared/src/state';
 
-export const SelectQuestionView = ({ io, state, setState }) => {
+import { Socket, SetState } from './types';
+
+export const SelectQuestionView = ({
+  io,
+  state,
+  setState,
+}: {
+  io: Socket;
+  state: SELECT_QUESTION_VIEW_TYPE;
+  setState: SetState;
+}) => {
   return (
     <div>
       <div>{state.round.name}</div>

@@ -4,7 +4,8 @@
   "private": true,
   "workspaces": [
     "backend",
-    "frontend"
+    "frontend",
+    "shared"
   ],
   "scripts": {
     "start:dev": "run-p start:dev:*",

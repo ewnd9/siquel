@@ -1,49 +1,15 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
-import { io } from 'socket.io-client';
+import { PlayerView, MetaView } from 'shared/src/state';
 
 import { SelectQuestionView } from './select-question-view';
 import { ShowQuestionView } from './show-question-view';
 import { PlayerStats } from './player-stats';
+import { useSocketIo } from './hooks/use-socket-io';
+import { Socket, SetState } from './types';
 
 const App = () => {
-  const [state, setState] = useState(null);
-  const ioRef = useRef(null);
-
-  useEffect(() => {
-    const userId = localStorage['sigame:userId'];
-    const socket = io();
-
-    if (userId) {
-      socket.emit('LOGIN', { id: userId }, ({ status, state }) => {
-        if (status === 'game') {
-          onUpdateState(state);
-        } else if (status === 'success') {
-          socket.emit('CREATE_GAME', {}, onUpdateState);
-        } else {
-          signUp();
-        }
-      });
-    } else {
-      signUp();
-    }
-
-    socket.on('UPDATE_STATE', onUpdateState);
-    ioRef.current = socket;
-
-    function signUp() {
-      socket.emit('SIGN_UP', { username: 'ivan' }, ({ id }) => {
-        localStorage['sigame:userId'] = id;
-        socket.emit('CREATE_GAME', {}, onUpdateState);
-      });
-    }
-
-    function onUpdateState(state) {
-      console.log({ state });
-      setState(state);
-    }
-  }, []);
-
+  const [state, setState, io] = useSocketIo();
   console.log({ state });
 
   if (!state) {
@@ -53,7 +19,7 @@ const App = () => {
   return (
     <div style={{ margin: '80px auto 0', maxWidth: '600px' }}>
       <Game
-        io={ioRef.current}
+        io={io}
         meta={state.metaView}
         state={state.playerView}
         setState={setState}
@@ -63,7 +29,17 @@ const App = () => {
   );
 };
 
-const Game = ({ io, meta, state, setState }) => {
+const Game = ({
+  io,
+  meta,
+  state,
+  setState,
+}: {
+  io: Socket;
+  meta: MetaView;
+  state: PlayerView;
+  setState: SetState;
+}) => {
   if (state.type === 'SELECT_QUESTION_VIEW') {
     return <SelectQuestionView io={io} state={state} setState={setState} />;
   } else if (state.type === 'SHOW_QUESTION_VIEW') {

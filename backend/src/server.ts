@@ -94,7 +94,6 @@ io.on('connection', (socket) => {
     );
 
     siqMap[roomId] = { files, media };
-    console.log('here', roomId);
     rooms[roomId] = state;
 
     socket.join(roomId);
