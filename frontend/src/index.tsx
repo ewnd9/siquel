@@ -52,21 +52,32 @@ const App = () => {
 
   return (
     <div style={{ margin: '80px auto 0', maxWidth: '600px' }}>
-      <Game io={ioRef.current} state={state} setState={setState} />
-      <PlayerStats state={state} />
+      <Game
+        io={ioRef.current}
+        meta={state.metaView}
+        state={state.playerView}
+        setState={setState}
+      />
+      <PlayerStats state={state.metaView} />
     </div>
   );
 };
 
-const Game = ({ io, state, setState }) => {
+const Game = ({ io, meta, state, setState }) => {
   if (state.type === 'SELECT_QUESTION_VIEW') {
     return <SelectQuestionView io={io} state={state} setState={setState} />;
   } else if (state.type === 'SHOW_QUESTION_VIEW') {
-    return <ShowQuestionView io={io} state={state} setState={setState} />;
+    return (
+      <ShowQuestionView io={io} meta={meta} state={state} setState={setState} />
+    );
   } else if (state.type === 'SHOW_QUESTION_ANSWERING_VIEW') {
-    return <ShowQuestionView io={io} state={state} setState={setState} />;
+    return (
+      <ShowQuestionView io={io} meta={meta} state={state} setState={setState} />
+    );
   } else if (state.type === 'SHOW_ANSWER_VIEW') {
-    return <ShowQuestionView io={io} state={state} setState={setState} />;
+    return (
+      <ShowQuestionView io={io} meta={meta} state={state} setState={setState} />
+    );
   } else {
     return <div>incorrect state</div>;
   }

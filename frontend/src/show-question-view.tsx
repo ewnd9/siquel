@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const ShowQuestionView = ({ io, state, setState }) => {
+export const ShowQuestionView = ({ io, meta, state, setState }) => {
   const isSomeoneAnswering = state.type === 'SHOW_QUESTION_ANSWERING_VIEW';
   const showingAnswer = state.type === 'SHOW_ANSWER_VIEW';
 
@@ -10,13 +10,13 @@ export const ShowQuestionView = ({ io, state, setState }) => {
         {state.question.question.type === 'image' ? (
           <img
             style={{ width: '600px', height: 'auto' }}
-            src={`/api/v1/static/${state.roomId}/${encodeURIComponent(
+            src={`/api/v1/static/${meta.roomId}/${encodeURIComponent(
               state.question.question.fileId
             )}`}
           />
         ) : state.question.question.type === 'voice' ? (
           <audio
-            src={`/api/v1/static/${state.roomId}/${encodeURIComponent(
+            src={`/api/v1/static/${meta.roomId}/${encodeURIComponent(
               state.question.question.fileId
             )}`}
             autoPlay

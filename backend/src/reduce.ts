@@ -3,31 +3,23 @@ import { RoundFull, Question, ParseSiqResult } from './types';
 interface SELECT_QUESTION_VIEW_TYPE {
   type: 'SELECT_QUESTION_VIEW';
   round: RoundFull;
-  players: Record<string, number>;
-  roomId: string;
 }
 
 interface SHOW_QUESTION_VIEW_TYPE {
   type: 'SHOW_QUESTION_VIEW';
   question: Question;
-  players: Record<string, number>;
-  roomId: string;
 }
 
 interface SHOW_QUESTION_ANSWERING_VIEW_TYPE {
   type: 'SHOW_QUESTION_ANSWERING_VIEW';
   question: Question;
   playerId: string;
-  players: Record<string, number>;
-  roomId: string;
 }
 
 interface SHOW_ANSWER_VIEW_TYPE {
   type: 'SHOW_ANSWER_VIEW';
   question: Question;
   answer: string;
-  players: Record<string, number>;
-  roomId: string;
 }
 
 type State = {
@@ -48,26 +40,33 @@ type State = {
       score: number;
     }
   >;
+
+  metaView?: {
+    players: Record<string, number>;
+    roomId: string;
+  };
+
+  playerView?: PlayerView;
 };
 
-type ReduceView =
+type PlayerView =
   | SELECT_QUESTION_VIEW_TYPE
   | SHOW_QUESTION_VIEW_TYPE
   | SHOW_QUESTION_ANSWERING_VIEW_TYPE
   | SHOW_ANSWER_VIEW_TYPE;
 
-export function reduce(state: State, action): [State, ReduceView] {
+export function reduce(state: State, action): State {
   if (action.type === 'CREATE_GAME') {
     const roundId = 0;
 
-    return [
-      {
-        ...state,
-        roundId,
-      },
-      {
+    return {
+      ...state,
+      roundId,
+      playerView: {
         type: 'SELECT_QUESTION_VIEW',
         round: mapRound({ state, roundId }),
+      },
+      metaView: {
         players: Object.values(state.players).reduce(
           (acc, { username, score }) => {
             acc[username] = score;
@@ -77,54 +76,35 @@ export function reduce(state: State, action): [State, ReduceView] {
         ),
         roomId: state.roomId,
       },
-    ];
+    };
   } else if (action.type === 'SELECT_QUESTION') {
     const questionId = action.id;
 
-    return [
-      {
-        ...state,
-        questionId,
-        answers: {},
-      },
-      {
+    return {
+      ...state,
+      questionId,
+      answers: {},
+      playerView: {
         type: 'SHOW_QUESTION_VIEW',
         question: state.game.questions[questionId],
-        players: Object.values(state.players).reduce(
-          (acc, { username, score }) => {
-            acc[username] = score;
-            return acc;
-          },
-          {}
-        ),
-        roomId: state.roomId,
       },
-    ];
+    };
   } else if (action.type === 'ANSWER_QUESTION') {
     const { questionId } = state;
+    console.log(Object.keys(state));
 
-    return [
-      {
-        ...state,
-        answeringId: action.playerId,
-        answers: {
-          [action.playerId]: true,
-        },
+    return {
+      ...state,
+      answeringId: action.playerId,
+      answers: {
+        [action.playerId]: true,
       },
-      {
+      playerView: {
         type: 'SHOW_QUESTION_ANSWERING_VIEW',
         question: state.game.questions[questionId],
         playerId: action.playerId,
-        players: Object.values(state.players).reduce(
-          (acc, { username, score }) => {
-            acc[username] = score;
-            return acc;
-          },
-          {}
-        ),
-        roomId: state.roomId,
       },
-    ];
+    };
   } else if (action.type === 'ACK_QUESTION') {
     const { questionId } = state;
 
@@ -151,12 +131,15 @@ export function reduce(state: State, action): [State, ReduceView] {
         answered,
       };
 
-      return [
-        nextState,
-        {
+      return {
+        ...nextState,
+        playerView: {
           type: 'SHOW_ANSWER_VIEW',
           question,
           answer: question.answer,
+        },
+        metaView: {
+          ...nextState.metaView,
           players: Object.values(nextState.players).reduce(
             (acc, { username, score }) => {
               acc[username] = score;
@@ -164,48 +147,29 @@ export function reduce(state: State, action): [State, ReduceView] {
             },
             {}
           ),
-          roomId: state.roomId,
         },
-      ];
+      };
     } else {
-      return [
-        {
-          ...state,
-          answeringId: action.playerId,
-          answers: {
-            [action.playerId]: true,
-          },
+      return {
+        ...state,
+        answeringId: action.playerId,
+        answers: {
+          [action.playerId]: true,
         },
-        {
+        playerView: {
           type: 'SHOW_QUESTION_VIEW',
           question: state.game.questions[questionId],
-          players: Object.values(state.players).reduce(
-            (acc, { username, score }) => {
-              acc[username] = score;
-              return acc;
-            },
-            {}
-          ),
-          roomId: state.roomId,
         },
-      ];
+      };
     }
   } else if (action.type === 'NEXT_QUESTION') {
-    return [
-      state,
-      {
+    return {
+      ...state,
+      playerView: {
         type: 'SELECT_QUESTION_VIEW',
         round: mapRound({ state, roundId: state.roundId }),
-        players: Object.values(state.players).reduce(
-          (acc, { username, score }) => {
-            acc[username] = score;
-            return acc;
-          },
-          {}
-        ),
-        roomId: state.roomId,
       },
-    ];
+    };
   }
 }
 

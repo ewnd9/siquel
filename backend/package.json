@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start:dev": "ts-node src/server.ts ../demo.siq"
+    "start:dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/server.ts ../demo.siq",
+    "start:dev:ts-node": "ts-node src/server.ts ../demo.siq"
   }
 }

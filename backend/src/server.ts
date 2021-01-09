@@ -40,8 +40,14 @@ io.on('connection', (socket) => {
       sockets[socket.id] = users[id];
 
       if (users[id].roomId) {
-        const { view } = rooms[users[id].roomId];
-        callback({ status: 'game', state: view });
+        const state = rooms[users[id].roomId];
+        callback({
+          status: 'game',
+          state: {
+            playerView: state.playerView,
+            metaView: state.metaView,
+          },
+        });
       } else {
         callback({ status: 'success' });
       }
@@ -70,7 +76,7 @@ io.on('connection', (socket) => {
     );
 
     const { id: playerId, username } = sockets[socket.id];
-    const [state, view] = reduce(
+    const state = reduce(
       {
         roomId,
         game,
@@ -88,12 +94,17 @@ io.on('connection', (socket) => {
     );
 
     siqMap[roomId] = { files, media };
-    rooms[roomId] = { state, view };
+    console.log('here', roomId);
+    rooms[roomId] = state;
 
     socket.join(roomId);
     sockets[socket.id].roomId = roomId;
 
-    callback(view);
+    callback({
+      playerView: state.playerView,
+      metaView: state.metaView,
+    });
+
     return false;
   });
 
@@ -101,45 +112,57 @@ io.on('connection', (socket) => {
     console.log('SELECT_QUESTION', socket.id);
 
     const { roomId } = sockets[socket.id];
-    const { state: prevState } = rooms[roomId];
+    const prevState = rooms[roomId];
 
-    const [state, view] = reduce(prevState, { type: 'SELECT_QUESTION', id });
-    rooms[roomId] = { state, view };
+    const state = reduce(prevState, { type: 'SELECT_QUESTION', id });
+    rooms[roomId] = state;
 
-    callback(view);
+    callback({
+      playerView: state.playerView,
+      metaView: state.metaView,
+    });
   });
 
   socket.on('ANSWER_QUESTION', (_, callback) => {
     console.log('ANSWER_QUESTION', socket.id);
 
     const { id: playerId, roomId } = sockets[socket.id];
-    const { state: prevState } = rooms[roomId];
+    const prevState = rooms[roomId];
 
-    const [state, view] = reduce(prevState, {
+    const state = reduce(prevState, {
       type: 'ANSWER_QUESTION',
       playerId,
     });
-    rooms[roomId] = { state, view };
+    rooms[roomId] = state;
 
-    callback(view);
+    callback({
+      playerView: state.playerView,
+      metaView: state.metaView,
+    });
   });
 
   socket.on('ACK_QUESTION', ({ ack }, callback) => {
     console.log('ACK_QUESTION', socket.id);
 
     const { roomId } = sockets[socket.id];
-    const { state: prevState } = rooms[roomId];
+    const prevState = rooms[roomId];
 
-    const [state, view] = reduce(prevState, { type: 'ACK_QUESTION', ack });
-    rooms[roomId] = { state, view };
+    const state = reduce(prevState, { type: 'ACK_QUESTION', ack });
+    rooms[roomId] = state;
 
-    callback(view);
+    callback({
+      playerView: state.playerView,
+      metaView: state.metaView,
+    });
 
-    if (view.type === 'SHOW_ANSWER_VIEW') {
+    if (state.playerView.type === 'SHOW_ANSWER_VIEW') {
       setTimeout(() => {
-        const [nextState, view] = reduce(state, { type: 'NEXT_QUESTION' });
-        rooms[roomId] = { state: nextState, view };
-        socket.emit('UPDATE_STATE', view);
+        const nextState = reduce(state, { type: 'NEXT_QUESTION' });
+        rooms[roomId] = nextState;
+        socket.emit('UPDATE_STATE', {
+          playerView: nextState.playerView,
+          metaView: nextState.metaView,
+        });
       }, 5000);
     }
   });
