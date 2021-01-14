@@ -11,6 +11,7 @@ const parseXml = promisify(parseString);
 export async function parseSiq(
   content: Buffer
 ): Promise<{
+  originalContent: any;
   game: ParseSiqResult;
   files: any;
   media: Record<string, string>;
@@ -25,6 +26,22 @@ export async function parseSiq(
   const questions = {};
   const media = {};
   let fileCounter = 0;
+
+  function normalizeFile(q: any) {
+    const type = q.$.type;
+    const filename = decodeURIComponent(q._.substring(1));
+    const ext = path.extname(q._);
+
+    const originalFileId =
+      type === 'image'
+        ? `Images/${filename}`
+        : type === 'voice'
+        ? `Audio/${filename}`
+        : q._;
+    const fileId = `${fileCounter++}${ext}`;
+    media[fileId] = originalFileId;
+    return { fileId, type };
+  }
 
   const rounds = data.package.rounds[0].round.map((round, index) => {
     return {
@@ -41,32 +58,29 @@ export async function parseSiq(
               price: question.$.price,
               question: null,
               answer: question.right[0].answer[0],
+              answerType: 'text',
             };
 
-            const q = question.scenario[0].atom[0];
+            const atoms = question.scenario[0].atom;
+            const q = atoms[0];
             if (typeof q === 'string') {
               result.question = {
                 text: q,
                 type: 'text',
               };
             } else {
-              const type = q.$.type;
-              const filename = decodeURIComponent(q._.substring(1));
-              const ext = path.extname(q._);
+              const { fileId, type } = normalizeFile(q);
 
-              const originalFileId =
-                type === 'image'
-                  ? `Images/${filename}`
-                  : type === 'voice'
-                  ? `Audio/${filename}`
-                  : q._;
-              const fileId = `${fileCounter++}${ext}`;
-
-              media[fileId] = originalFileId;
               result.question = {
                 fileId,
                 type,
               };
+
+              if (atoms.length === 3 && atoms[1].$.type === 'marker') {
+                const { fileId, type } = normalizeFile(atoms[2]);
+                result.answer = fileId;
+                result.answerType = type;
+              }
             }
 
             questions[result.id] = result;
@@ -90,6 +104,7 @@ export async function parseSiq(
   };
 
   return {
+    originalContent: data,
     game,
     files: Object.entries(zip.files).reduce((acc, [key, value]) => {
       acc[decodeURIComponent(key)] = value;

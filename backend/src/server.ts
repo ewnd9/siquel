@@ -121,8 +121,12 @@ async function main() {
       console.log('CREATE_GAME', socket.id);
 
       const roomId = `game-${uuid()}`;
-      const { game, files, media } = await parseSiq(
+      const { originalContent, game, files, media } = await parseSiq(
         fs.readFileSync(process.argv[2])
+      );
+      fs.writeFileSync(
+        `${rootDir}/test.json`,
+        JSON.stringify(originalContent, null, 2)
       );
 
       const archiveDir = path.resolve(

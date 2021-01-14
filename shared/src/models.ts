@@ -35,6 +35,7 @@ export interface Question {
         fileId: string;
       };
   answer: string;
+  answerType: 'text' | 'image';
 }
 
 export interface ParseSiqResult {
