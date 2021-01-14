@@ -1,86 +1,23 @@
-export interface Round {
-  id: string;
-  name: string;
-  themes: string[];
-}
-
-export type RoundFull = Omit<Round, 'themes'> & {
-  themes: ThemeFull[];
-};
-
-export interface Theme {
-  id: string;
-  name: string;
-  comments?: string;
-  questions: string[];
-}
-
-export type ThemeFull = Omit<Theme, 'questions'> & {
-  id: string;
-  name: string;
-  comments?: string;
-  questions: Question[];
-};
-
-export interface Question {
-  id: string;
-  price: string;
-  question:
-    | {
-        type: 'text';
-        text: string;
-      }
-    | {
-        type: 'image' | 'voice';
-        fileId: string;
-      };
-  answer: string;
-}
-
-export interface ParseSiqResult {
-  id: string;
-  name: string;
-  rounds: Round[];
-  themes: Record<string, Theme>;
-  questions: Record<string, Question>;
-}
-
-interface SELECT_QUESTION_VIEW_TYPE {
-  type: 'SELECT_QUESTION_VIEW';
-  round: RoundFull;
-}
-
-interface SHOW_QUESTION_VIEW_TYPE {
-  type: 'SHOW_QUESTION_VIEW';
-  question: Question;
-}
-
-interface SHOW_QUESTION_ANSWERING_VIEW_TYPE {
-  type: 'SHOW_QUESTION_ANSWERING_VIEW';
-  question: Question;
-  playerId: string;
-}
-
-interface SHOW_ANSWER_VIEW_TYPE {
-  type: 'SHOW_ANSWER_VIEW';
-  question: Question;
-  answer: string;
-}
+import { ParseSiqResult } from './models';
+import { PlayerView } from './player-state';
+import { OwnerView } from './owner-state';
+import { OwnerShowQuestionView } from '../../frontend/src/owner-show-question-view';
 
 export interface State {
-  roomId: string;
-  game: ParseSiqResult;
+  roomId?: string;
+  game?: ParseSiqResult;
   roundId?: number;
-  ownerId: string;
-  answered: Record<string, boolean>;
+  ownerId?: string;
+  answered?: Record<string, boolean>;
 
-  answers: Record<string, boolean>;
+  answers?: Record<string, boolean>;
   answeringId?: string;
   questionId?: string;
 
-  players: Record<
+  players?: Record<
     string,
     {
+      id: string;
       username: string;
       score: number;
     }
@@ -88,15 +25,20 @@ export interface State {
 
   metaView?: MetaView;
   playerView?: PlayerView;
+  ownerView?: OwnerView;
+  auth?: { id: string; username: string };
 }
 
 export interface MetaView {
-  players: Record<string, number>;
+  players: Record<
+    string,
+    {
+      id: string;
+      username: string;
+      score: number;
+    }
+  >;
   roomId: string;
 }
 
-export type PlayerView =
-  | SELECT_QUESTION_VIEW_TYPE
-  | SHOW_QUESTION_VIEW_TYPE
-  | SHOW_QUESTION_ANSWERING_VIEW_TYPE
-  | SHOW_ANSWER_VIEW_TYPE;
+export type ClientView = PlayerView | OwnerView;

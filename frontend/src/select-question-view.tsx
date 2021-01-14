@@ -1,5 +1,8 @@
 import React from 'react';
-import { SELECT_QUESTION_VIEW_TYPE } from 'shared/src/state';
+import {
+  SELECT_QUESTION_VIEW_TYPE,
+  OWNER_SELECT_QUESTION_VIEW_TYPE,
+} from 'shared/src';
 
 import { Socket, SetState } from './types';
 
@@ -9,7 +12,7 @@ export const SelectQuestionView = ({
   setState,
 }: {
   io: Socket;
-  state: SELECT_QUESTION_VIEW_TYPE;
+  state: SELECT_QUESTION_VIEW_TYPE | OWNER_SELECT_QUESTION_VIEW_TYPE;
   setState: SetState;
 }) => {
   return (
@@ -24,6 +27,10 @@ export const SelectQuestionView = ({
                 <td
                   key={index}
                   onClick={() => {
+                    if (state.type === 'OWNER_SELECT_QUESTION_VIEW') {
+                      return;
+                    }
+
                     io.emit(
                       'SELECT_QUESTION',
                       {

@@ -1,11 +1,16 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { io } from 'socket.io-client';
+import { State } from 'shared/src';
 
-import { State, Socket, SetState } from '../types';
+import { Socket, SetState } from '../types';
 
 export function useSocketIo(): [State, SetState, Socket] {
   const [state, setState] = useState<State>(null);
   const ioRef = useRef(null);
+  const onUpdateState = useCallback((state: State) => {
+    console.log({ state });
+    setState(state);
+  }, []);
 
   useEffect(() => {
     const userId = localStorage['sigame:userId'];
@@ -15,31 +20,17 @@ export function useSocketIo(): [State, SetState, Socket] {
       socket.emit('LOGIN', { id: userId }, ({ status, state }) => {
         if (status === 'game') {
           onUpdateState(state);
-        } else if (status === 'success') {
-          socket.emit('CREATE_GAME', {}, onUpdateState);
         } else {
-          signUp();
+          onUpdateState({ playerView: { type: 'LOGIN' } });
         }
       });
     } else {
-      signUp();
+      onUpdateState({ playerView: { type: 'LOGIN' } });
     }
 
     socket.on('UPDATE_STATE', onUpdateState);
     ioRef.current = socket;
+  }, [onUpdateState]);
 
-    function signUp() {
-      socket.emit('SIGN_UP', { username: 'ivan' }, ({ id }) => {
-        localStorage['sigame:userId'] = id;
-        socket.emit('CREATE_GAME', {}, onUpdateState);
-      });
-    }
-
-    function onUpdateState(state) {
-      console.log({ state });
-      setState(state);
-    }
-  }, []);
-
-  return [state, setState, ioRef.current];
+  return [state, onUpdateState, ioRef.current];
 }

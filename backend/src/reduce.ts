@@ -1,29 +1,52 @@
-import { State } from 'shared/src/state';
+import omit from 'lodash/omit';
+import { State } from 'shared/src';
 
 export function reduce(state: State, action): State {
   if (action.type === 'CREATE_GAME') {
     const roundId = 0;
+    const round = mapRound({ state, roundId });
 
     return {
       ...state,
       roundId,
       playerView: {
         type: 'SELECT_QUESTION_VIEW',
-        round: mapRound({ state, roundId }),
+        round,
+      },
+      ownerView: {
+        type: 'OWNER_SELECT_QUESTION_VIEW',
+        round,
       },
       metaView: {
-        players: Object.values(state.players).reduce(
-          (acc, { username, score }) => {
-            acc[username] = score;
-            return acc;
-          },
-          {}
-        ),
+        players: state.players,
         roomId: state.roomId,
+      },
+    };
+  } else if (action.type === 'JOIN_GAME') {
+    const playerId = action.playerId;
+    const username = action.username;
+
+    const players: State['players'] = {
+      ...state.players,
+      [playerId]: {
+        id: playerId,
+        username,
+        score: 0,
+      },
+    };
+
+    return {
+      ...state,
+      players,
+      metaView: {
+        ...state.metaView,
+        players,
       },
     };
   } else if (action.type === 'SELECT_QUESTION') {
     const questionId = action.id;
+    const answer = state.game.questions[questionId].answer;
+    const question = omit(state.game.questions[questionId], 'answer');
 
     return {
       ...state,
@@ -31,12 +54,18 @@ export function reduce(state: State, action): State {
       answers: {},
       playerView: {
         type: 'SHOW_QUESTION_VIEW',
-        question: state.game.questions[questionId],
+        question,
+      },
+      ownerView: {
+        type: 'OWNER_SHOW_QUESTION_VIEW',
+        question,
+        answer,
       },
     };
   } else if (action.type === 'ANSWER_QUESTION') {
     const { questionId } = state;
-    console.log(Object.keys(state));
+    const answer = state.game.questions[questionId].answer;
+    const question = omit(state.game.questions[questionId], 'answer');
 
     return {
       ...state,
@@ -46,15 +75,22 @@ export function reduce(state: State, action): State {
       },
       playerView: {
         type: 'SHOW_QUESTION_ANSWERING_VIEW',
-        question: state.game.questions[questionId],
+        question,
         playerId: action.playerId,
+      },
+      ownerView: {
+        type: 'OWNER_SHOW_QUESTION_ANSWERING_VIEW',
+        question,
+        playerId: action.playerId,
+        answer,
       },
     };
   } else if (action.type === 'ACK_QUESTION') {
     const { questionId } = state;
+    const answer = state.game.questions[questionId].answer;
+    const question = omit(state.game.questions[questionId], 'answer');
 
     if (action.ack) {
-      const question = state.game.questions[questionId];
       const players = {
         ...state.players,
         [state.answeringId]: {
@@ -81,17 +117,16 @@ export function reduce(state: State, action): State {
         playerView: {
           type: 'SHOW_ANSWER_VIEW',
           question,
-          answer: question.answer,
+          answer,
+        },
+        ownerView: {
+          type: 'OWNER_SHOW_ANSWER_VIEW',
+          question,
+          answer,
         },
         metaView: {
           ...nextState.metaView,
-          players: Object.values(nextState.players).reduce(
-            (acc, { username, score }) => {
-              acc[username] = score;
-              return acc;
-            },
-            {}
-          ),
+          players,
         },
       };
     } else {
@@ -103,18 +138,69 @@ export function reduce(state: State, action): State {
         },
         playerView: {
           type: 'SHOW_QUESTION_VIEW',
-          question: state.game.questions[questionId],
+          question,
+        },
+        ownerView: {
+          type: 'OWNER_SHOW_QUESTION_VIEW',
+          question,
+          answer,
         },
       };
     }
   } else if (action.type === 'NEXT_QUESTION') {
-    return {
-      ...state,
-      playerView: {
-        type: 'SELECT_QUESTION_VIEW',
-        round: mapRound({ state, roundId: state.roundId }),
-      },
-    };
+    const isRoundEnded = state.game.rounds[
+      state.roundId
+    ].themes.every((themeId) =>
+      state.game.themes[themeId].questions.every(
+        (questionId) => state.answered[questionId]
+      )
+    );
+
+    if (isRoundEnded) {
+      const isGameEnded = !state.game.rounds[state.roundId + 1];
+
+      if (isGameEnded) {
+        return {
+          ...state,
+          playerView: {
+            type: 'END_GAME',
+          },
+          ownerView: {
+            type: 'END_GAME',
+          },
+        };
+      } else {
+        const roundId = state.roundId + 1;
+        const round = mapRound({ state, roundId });
+
+        return {
+          ...state,
+          roundId,
+          playerView: {
+            type: 'SELECT_QUESTION_VIEW',
+            round,
+          },
+          ownerView: {
+            type: 'OWNER_SELECT_QUESTION_VIEW',
+            round,
+          },
+        };
+      }
+    } else {
+      const round = mapRound({ state, roundId: state.roundId });
+
+      return {
+        ...state,
+        playerView: {
+          type: 'SELECT_QUESTION_VIEW',
+          round,
+        },
+        ownerView: {
+          type: 'OWNER_SELECT_QUESTION_VIEW',
+          round,
+        },
+      };
+    }
   }
 }
 

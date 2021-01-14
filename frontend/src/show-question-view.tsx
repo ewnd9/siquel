@@ -4,9 +4,11 @@ import {
   SHOW_QUESTION_VIEW_TYPE,
   SHOW_QUESTION_ANSWERING_VIEW_TYPE,
   SHOW_ANSWER_VIEW_TYPE,
-} from 'shared/src/state';
+} from 'shared/src';
 
 import { SetState, Socket } from './types';
+import { Question } from './components/question';
+import { Answering } from './components/answering';
 
 export const ShowQuestionView = ({
   io,
@@ -22,39 +24,18 @@ export const ShowQuestionView = ({
     | SHOW_ANSWER_VIEW_TYPE;
   setState: SetState;
 }) => {
-  const isSomeoneAnswering = state.type === 'SHOW_QUESTION_ANSWERING_VIEW';
-  const showingAnswer = state.type === 'SHOW_ANSWER_VIEW';
-
   return (
     <div>
-      <div>
-        {state.question.question.type === 'image' ? (
-          <img
-            style={{ width: '600px', height: 'auto' }}
-            src={`/api/v1/static/${meta.roomId}/${encodeURIComponent(
-              state.question.question.fileId
-            )}`}
-          />
-        ) : state.question.question.type === 'voice' ? (
-          <audio
-            src={`/api/v1/static/${meta.roomId}/${encodeURIComponent(
-              state.question.question.fileId
-            )}`}
-            autoPlay
-          />
-        ) : state.question.question.type === 'text' ? (
-          <div>{state.question.question.text}</div>
-        ) : (
-          JSON.stringify(state.question, null, 2)
-        )}
-      </div>
-      {isSomeoneAnswering ? <div>answering: {state.playerId}</div> : null}
-      {showingAnswer ? (
-        state.answer
+      <Question state={state} meta={meta} />
+      {state.type === 'SHOW_QUESTION_ANSWERING_VIEW' ? (
+        <Answering state={state} meta={meta} />
+      ) : null}
+      {state.type === 'SHOW_ANSWER_VIEW' ? (
+        <div>Answer: {state.answer}</div>
       ) : (
         <>
           <button
-            disabled={isSomeoneAnswering}
+            disabled={state.type === 'SHOW_QUESTION_ANSWERING_VIEW'}
             onClick={() => {
               io.emit('ANSWER_QUESTION', {}, (state) => {
                 setState(state);
@@ -63,28 +44,6 @@ export const ShowQuestionView = ({
           >
             answer
           </button>
-          {isSomeoneAnswering && (
-            <div>
-              <button
-                onClick={() => {
-                  io.emit('ACK_QUESTION', { ack: true }, (state) =>
-                    setState(state)
-                  );
-                }}
-              >
-                correct
-              </button>
-              <button
-                onClick={() => {
-                  io.emit('ACK_QUESTION', { ack: false }, (state) =>
-                    setState(state)
-                  );
-                }}
-              >
-                not correct
-              </button>
-            </div>
-          )}
         </>
       )}
     </div>

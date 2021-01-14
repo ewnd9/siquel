@@ -1,9 +1,10 @@
 import Zip from 'jszip';
 import { parseString } from 'xml2js';
 import { v4 as uuid } from 'uuid';
-import { ParseSiqResult } from 'shared/src/state';
+import { ParseSiqResult } from 'shared/src';
 
 import { promisify } from 'util';
+import path from 'path';
 
 const parseXml = promisify(parseString);
 
@@ -23,6 +24,7 @@ export async function parseSiq(
   const themes = {};
   const questions = {};
   const media = {};
+  let fileCounter = 0;
 
   const rounds = data.package.rounds[0].round.map((round, index) => {
     return {
@@ -50,13 +52,15 @@ export async function parseSiq(
             } else {
               const type = q.$.type;
               const filename = decodeURIComponent(q._.substring(1));
+              const ext = path.extname(q._);
+
               const originalFileId =
                 type === 'image'
                   ? `Images/${filename}`
                   : type === 'voice'
                   ? `Audio/${filename}`
                   : q._;
-              const fileId = uuid();
+              const fileId = `${fileCounter++}${ext}`;
 
               media[fileId] = originalFileId;
               result.question = {
@@ -79,6 +83,7 @@ export async function parseSiq(
   const game = {
     id: data.package.$.id,
     name: data.package.$.name,
+    version: data.package.$.version,
     rounds,
     themes,
     questions,
