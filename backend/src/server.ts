@@ -14,6 +14,12 @@ const io = require('socket.io')(http);
 const rootDir = path.resolve(`${__dirname}/../..`);
 const stateJsonPath = path.resolve(`${rootDir}/data/state.json`);
 
+const packPath = process.env.SIQ_PACK;
+
+if (!fs.existsSync(packPath)) {
+  throw new Error(`${packPath} doesn't exist`);
+}
+
 main().catch((err) => {
   console.error(err);
   process.exit(1);
