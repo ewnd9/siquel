@@ -23,9 +23,10 @@ export const LoginView = ({
           io.emit('SIGN_UP', { username }, (state) => {
             localStorage['sigame:userId'] = state.auth.id;
 
-            const match = /\/room\/([\d\w-]+)/.exec(window.location.pathname);
+            const match = /\/join\/(owner|player)\/([\d\w-]+)/.exec(window.location.pathname);
+            console.log(match);
             if (match) {
-              io.emit('JOIN_GAME', { roomId: match[1] }, setState);
+              io.emit('JOIN_GAME', { userType: match[1], roomId: match[2] }, setState);
             } else {
               setState(state);
             }

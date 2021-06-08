@@ -1,7 +1,6 @@
 import { ParseSiqResult } from './models';
 import { PlayerView } from './player-state';
 import { OwnerView } from './owner-state';
-import { OwnerShowQuestionView } from '../../frontend/src/owner-show-question-view';
 
 export interface State {
   roomId?: string;

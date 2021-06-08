@@ -14,6 +14,7 @@ const io = require('socket.io')(http);
 const rootDir = path.resolve(`${__dirname}/../..`);
 const stateJsonPath = path.resolve(`${rootDir}/data/state.json`);
 
+const port = process.env.PORT || 3000;
 const packPath = process.env.SIQ_PACK;
 
 if (!fs.existsSync(packPath)) {
@@ -26,20 +27,11 @@ main().catch((err) => {
 });
 
 async function main() {
-  const globalState: {
-    rooms: Record<string, State>;
-    sockets: Record<string, { id: string; username: string; roomId?: string }>;
-    users: Record<
-      string,
-      { id: string; username: string; roomId?: string; socketId?: string }
-    >;
-  } = fs.existsSync(stateJsonPath)
-    ? JSON.parse(fs.readFileSync(stateJsonPath, 'utf-8'))
-    : {
-        rooms: {},
-        sockets: {},
-        users: {},
-      };
+  const { roomId, game, globalState } = await initGame();
+  persistState();
+
+  console.log(`join game as owner localhost:${port}/join/owner/${roomId}`);
+  console.log(`join game as player localhost:${port}/join/player/${roomId}`);
 
   app.get('/', (_req, res) => {
     res.json({ status: 'ok' });
@@ -123,73 +115,21 @@ async function main() {
       persistState();
     });
 
-    socket.on('CREATE_GAME', async (_, callback) => {
-      console.log('CREATE_GAME', socket.id);
-
-      const roomId = `game-${uuid()}`;
-      const { originalContent, game, files, media } = await parseSiq(
-        fs.readFileSync(packPath)
-      );
-      fs.writeFileSync(
-        `${rootDir}/test.json`,
-        JSON.stringify(originalContent, null, 2)
-      );
-
-      const archiveDir = path.resolve(
-        `${__dirname}/../../data/${game.id}-${game.version}`
-      );
-
-      if (!fs.existsSync(archiveDir)) {
-        fs.mkdirSync(archiveDir, { recursive: true });
-
-        for (const [mediaId, fileId] of Object.entries(media)) {
-          const file = files[fileId];
-          fs.writeFileSync(
-            `${archiveDir}/${mediaId}`,
-            await file.async('nodebuffer')
-          );
-        }
-      }
-
-      const { id: playerId } = globalState.sockets[socket.id];
-      const state = reduce(
-        {
-          roomId,
-          game,
-          ownerId: playerId,
-          answered: {},
-          answers: {},
-          players: {},
-        },
-        { type: 'CREATE_GAME' }
-      );
-
-      globalState.rooms[roomId] = state;
-      globalState.sockets[socket.id].roomId = roomId;
-
-      callback({
-        playerView: state.ownerView,
-        metaView: state.metaView,
-      });
-      persistState();
-
-      return false;
-    });
-
-    socket.on('JOIN_GAME', async ({ roomId }) => {
+    socket.on('JOIN_GAME', async ({ roomId, userType }) => {
       console.log('JOIN_GAME', socket.id);
 
-      const { id: playerId, username } = globalState.sockets[socket.id];
+      const { id: userId, username } = globalState.sockets[socket.id];
       const prevState = globalState.rooms[roomId];
       const state = reduce(prevState, {
         type: 'JOIN_GAME',
-        playerId,
+        userId,
         username,
+        userType,
       });
 
       globalState.rooms[roomId] = state;
       globalState.sockets[socket.id].roomId = roomId;
-      globalState.users[playerId].roomId = roomId;
+      globalState.users[userId].roomId = roomId;
 
       emitGameState(state);
     });
@@ -215,6 +155,8 @@ async function main() {
       if (prevState.playerView.type !== 'SHOW_QUESTION_VIEW') {
         return;
       }
+
+      console.log({ prevState });
 
       const state = reduce(prevState, {
         type: 'ANSWER_QUESTION',
@@ -266,19 +208,22 @@ async function main() {
     console.log(`connected`, socket.id);
   });
 
-  http.listen(3000, () => {
-    console.log('listening on *:3000');
+  http.listen(port, () => {
+    console.log(`listening on *:${port}`);
   });
 
   function emitGameState(state: State) {
     const ownerId = state.ownerId;
+    const ownerSocket = globalState.users[ownerId];
+
+    if (ownerSocket) {
+      sendToSocket(globalState.users[ownerId].socketId, {
+        playerView: state.ownerView,
+        metaView: state.metaView,
+      });
+    }
+
     const players = Object.keys(state.players);
-
-    sendToSocket(globalState.users[ownerId].socketId, {
-      playerView: state.ownerView,
-      metaView: state.metaView,
-    });
-
     players.forEach((playerId) =>
       sendToSocket(globalState.users[playerId].socketId, {
         playerView: state.playerView,
@@ -299,4 +244,61 @@ async function main() {
   function persistState() {
     fs.writeFileSync(stateJsonPath, JSON.stringify(globalState, null, 2));
   }
+}
+
+async function initGame() {
+  const roomId = `game-${uuid()}`;
+  const { originalContent, game, files, media } = await parseSiq(
+    fs.readFileSync(packPath)
+  );
+  fs.writeFileSync(
+    `${rootDir}/test.json`,
+    JSON.stringify(originalContent, null, 2)
+  );
+
+  const archiveDir = path.resolve(
+    `${__dirname}/../../data/${game.id}-${game.version}`
+  );
+
+  if (!fs.existsSync(archiveDir)) {
+    fs.mkdirSync(archiveDir, { recursive: true });
+
+    for (const [mediaId, fileId] of Object.entries(media)) {
+      const file = files[fileId];
+      fs.writeFileSync(
+        `${archiveDir}/${mediaId}`,
+        await file.async('nodebuffer')
+      );
+    }
+  }
+
+  const globalState: {
+    rooms: Record<string, State>;
+    sockets: Record<string, { id: string; username: string; roomId?: string }>;
+    users: Record<
+      string,
+      { id: string; username: string; roomId?: string; socketId?: string }
+    >;
+  } = fs.existsSync(stateJsonPath)
+    ? JSON.parse(fs.readFileSync(stateJsonPath, 'utf-8'))
+    : {
+        rooms: {},
+        sockets: {},
+        users: {},
+      };
+
+  const state = reduce(
+    {
+      roomId,
+      game,
+      answered: {},
+      answers: {},
+      players: {},
+    },
+    { type: 'CREATE_GAME' }
+  );
+
+  globalState.rooms[roomId] = state;
+
+  return { roomId, game, globalState };
 }

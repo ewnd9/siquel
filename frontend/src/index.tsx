@@ -8,7 +8,6 @@ import { PlayerStats } from './player-stats';
 import { useSocketIo } from './hooks/use-socket-io';
 import { Socket, SetState } from './types';
 import { LoginView } from './login-view';
-import { GameListView } from './game-list-view';
 import { OwnerShowQuestionView } from './owner-show-question-view';
 
 const App = () => {
@@ -55,8 +54,6 @@ const Game = ({
 }) => {
   if (state.type === 'LOGIN') {
     return <LoginView io={io} state={state} setState={setState} />;
-  } else if (state.type === 'GAME_LIST') {
-    return <GameListView io={io} state={state} setState={setState} />;
   } else if (state.type === 'SELECT_QUESTION_VIEW') {
     return <SelectQuestionView io={io} state={state} setState={setState} />;
   } else if (state.type === 'SHOW_QUESTION_VIEW') {
