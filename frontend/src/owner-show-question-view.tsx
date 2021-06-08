@@ -31,7 +31,7 @@ export const OwnerShowQuestionView = ({
         <Answering state={state} meta={meta} />
       ) : null}
       <div>Answer: {state.answer}</div>
-      {state.type === 'OWNER_SHOW_QUESTION_ANSWERING_VIEW' && (
+      {(state.type === 'OWNER_SHOW_QUESTION_ANSWERING_VIEW' && (
         <div>
           <button
             onClick={() => {
@@ -50,6 +50,16 @@ export const OwnerShowQuestionView = ({
             }}
           >
             not correct
+          </button>
+        </div>
+      )) || (
+        <div>
+          <button
+            onClick={() => {
+              io.emit('SKIP_QUESTION', {}, (state) => setState(state));
+            }}
+          >
+            skip question
           </button>
         </div>
       )}

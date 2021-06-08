@@ -244,6 +244,25 @@ async function main() {
       }
     });
 
+    socket.on('SKIP_QUESTION', () => {
+      console.log('SKIP_QUESTION', socket.id);
+
+      const { roomId } = globalState.sockets[socket.id];
+      const prevState = globalState.rooms[roomId];
+
+      const state = reduce(prevState, { type: 'SKIP_QUESTION' });
+      globalState.rooms[roomId] = state;
+      emitGameState(state);
+
+      if (state.playerView.type === 'SHOW_ANSWER_VIEW') {
+        setTimeout(() => {
+          const nextState = reduce(state, { type: 'NEXT_QUESTION' });
+          globalState.rooms[roomId] = nextState;
+          emitGameState(nextState);
+        }, 2);
+      }
+    });
+
     console.log(`connected`, socket.id);
   });
 

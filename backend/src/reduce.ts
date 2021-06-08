@@ -147,13 +147,42 @@ export function reduce(state: State, action): State {
         },
       };
     }
+  } else if (action.type === 'SKIP_QUESTION') {
+    const { questionId } = state;
+    const answer = state.game.questions[questionId].answer;
+    const question = omit(state.game.questions[questionId], 'answer');
+
+    const answered = {
+      ...state.answered,
+      [state.questionId]: true,
+    };
+
+    const nextState = {
+      ...state,
+      answeringId: undefined,
+      answers: {},
+      answered,
+    };
+
+    return {
+      ...nextState,
+      playerView: {
+        type: 'SHOW_ANSWER_VIEW',
+        question,
+        answer,
+      },
+      ownerView: {
+        type: 'OWNER_SHOW_ANSWER_VIEW',
+        question,
+        answer,
+      },
+    };
   } else if (action.type === 'NEXT_QUESTION') {
-    const isRoundEnded = state.game.rounds[
-      state.roundId
-    ].themes.every((themeId) =>
-      state.game.themes[themeId].questions.every(
-        (questionId) => state.answered[questionId]
-      )
+    const isRoundEnded = state.game.rounds[state.roundId].themes.every(
+      (themeId) =>
+        state.game.themes[themeId].questions.every(
+          (questionId) => state.answered[questionId]
+        )
     );
 
     if (isRoundEnded) {
