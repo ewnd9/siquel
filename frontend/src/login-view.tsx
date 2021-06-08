@@ -23,10 +23,16 @@ export const LoginView = ({
           io.emit('SIGN_UP', { username }, (state) => {
             localStorage['sigame:userId'] = state.auth.id;
 
-            const match = /\/join\/(owner|player)\/([\d\w-]+)/.exec(window.location.pathname);
+            const match = /\/join\/(owner|player)\/([\d\w-]+)/.exec(
+              window.location.pathname
+            );
             console.log(match);
             if (match) {
-              io.emit('JOIN_GAME', { userType: match[1], roomId: match[2] }, setState);
+              io.emit(
+                'JOIN_GAME',
+                { userType: match[1], roomId: match[2] },
+                setState
+              );
             } else {
               setState(state);
             }
@@ -39,7 +45,9 @@ export const LoginView = ({
           required={true}
           placeholder="Username"
         />
-        <button type="submit">Войти</button>
+        <button className="ml-2" type="submit">
+          Войти
+        </button>
       </form>
     </div>
   );

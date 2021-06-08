@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { MetaView, ClientView } from 'shared';
 
+import './style.css';
 import { SelectQuestionView } from './select-question-view';
 import { ShowQuestionView } from './show-question-view';
 import { PlayerStats } from './player-stats';
@@ -19,15 +20,17 @@ const App = () => {
   }
 
   return (
-    <div style={{ margin: '80px auto 0', maxWidth: '600px' }}>
-      <Game
-        io={io}
-        meta={state.metaView}
-        state={state.playerView}
-        setState={setState}
-      />
-      {state.metaView ? <PlayerStats state={state.metaView} /> : null}
-      {/* <img
+    <div className="max-w-lg mt-20 p-5 mx-auto bg-white">
+      <h1>Siquel Game</h1>
+      <div className="mt-3">
+        <Game
+          io={io}
+          meta={state.metaView}
+          state={state.playerView}
+          setState={setState}
+        />
+        {state.metaView ? <PlayerStats state={state.metaView} /> : null}
+        {/* <img
         src="/static/gifs/correct/snoop-dog.gif"
         style={{
           width: '200px',
@@ -37,6 +40,7 @@ const App = () => {
           right: 0,
         }}
       /> */}
+      </div>
     </div>
   );
 };

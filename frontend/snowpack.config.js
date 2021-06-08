@@ -8,6 +8,7 @@ module.exports = {
     '@snowpack/plugin-react-refresh',
     '@snowpack/plugin-dotenv',
     '@snowpack/plugin-typescript',
+    '@snowpack/plugin-postcss',
   ],
   install: [
     /* ... */
@@ -18,6 +19,7 @@ module.exports = {
   devOptions: {
     output: 'stream', // dont clear terminal
     open: 'none',
+    tailwindConfig: './tailwind.config.js',
   },
   buildOptions: {
     /* ... */
