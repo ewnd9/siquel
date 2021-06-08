@@ -128,7 +128,7 @@ async function main() {
 
       const roomId = `game-${uuid()}`;
       const { originalContent, game, files, media } = await parseSiq(
-        fs.readFileSync(process.argv[2])
+        fs.readFileSync(packPath)
       );
       fs.writeFileSync(
         `${rootDir}/test.json`,
