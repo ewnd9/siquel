@@ -1,4 +1,4 @@
-import { RoundFull, Question } from './models';
+import { RoundFull, QuestionWithoutAnswer } from './models';
 import { CommonState } from './common-state';
 
 export interface SELECT_QUESTION_VIEW_TYPE {
@@ -8,18 +8,18 @@ export interface SELECT_QUESTION_VIEW_TYPE {
 
 export interface SHOW_QUESTION_VIEW_TYPE {
   type: 'SHOW_QUESTION_VIEW';
-  question: Question;
+  question: QuestionWithoutAnswer;
 }
 
 export interface SHOW_QUESTION_ANSWERING_VIEW_TYPE {
   type: 'SHOW_QUESTION_ANSWERING_VIEW';
-  question: Question;
+  question: QuestionWithoutAnswer;
   playerId: string;
 }
 
 export interface SHOW_ANSWER_VIEW_TYPE {
   type: 'SHOW_ANSWER_VIEW';
-  question: Question;
+  question: QuestionWithoutAnswer;
   answer: string;
 }
 

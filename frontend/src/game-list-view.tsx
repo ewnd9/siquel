@@ -1,5 +1,5 @@
 import React from 'react';
-import { GAME_LIST_TYPE } from 'shared/src';
+import { GAME_LIST_TYPE } from 'shared';
 
 import { Socket, SetState } from './types';
 

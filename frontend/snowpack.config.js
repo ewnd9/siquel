@@ -16,7 +16,8 @@ module.exports = {
     /* ... */
   },
   devOptions: {
-    /* ... */
+    output: 'stream', // dont clear terminal
+    open: 'none',
   },
   buildOptions: {
     /* ... */

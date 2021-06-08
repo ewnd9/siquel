@@ -2,7 +2,7 @@ import React from 'react';
 import {
   SELECT_QUESTION_VIEW_TYPE,
   OWNER_SELECT_QUESTION_VIEW_TYPE,
-} from 'shared/src';
+} from 'shared';
 
 import { Socket, SetState } from './types';
 

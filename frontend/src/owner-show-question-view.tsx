@@ -4,7 +4,7 @@ import {
   OWNER_SHOW_QUESTION_VIEW_TYPE,
   OWNER_SHOW_QUESTION_ANSWERING_VIEW_TYPE,
   OWNER_SHOW_ANSWER_VIEW_TYPE,
-} from 'shared/src';
+} from 'shared';
 
 import { SetState, Socket } from './types';
 import { Question } from './components/question';

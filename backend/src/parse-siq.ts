@@ -1,7 +1,7 @@
 import Zip from 'jszip';
 import { parseString } from 'xml2js';
 import { v4 as uuid } from 'uuid';
-import { ParseSiqResult } from 'shared/src';
+import { ParseSiqResult } from 'shared';
 
 import { promisify } from 'util';
 import path from 'path';

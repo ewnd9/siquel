@@ -1,6 +1,6 @@
 import express from 'express';
 import { v4 as uuid } from 'uuid';
-import { State } from 'shared/src';
+import { State } from 'shared';
 
 import fs from 'fs';
 import path from 'path';

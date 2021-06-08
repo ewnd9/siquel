@@ -1,5 +1,5 @@
 import omit from 'lodash/omit';
-import { State } from 'shared/src';
+import { State } from 'shared';
 
 export function reduce(state: State, action): State {
   if (action.type === 'CREATE_GAME') {

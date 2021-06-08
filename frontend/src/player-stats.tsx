@@ -1,5 +1,5 @@
 import React from 'react';
-import { MetaView } from 'shared/src';
+import { MetaView } from 'shared';
 
 export const PlayerStats = ({ state }: { state: MetaView }) => {
   return (

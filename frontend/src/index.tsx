@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { MetaView, ClientView } from 'shared/src';
+import { MetaView, ClientView } from 'shared';
 
 import { SelectQuestionView } from './select-question-view';
 import { ShowQuestionView } from './show-question-view';

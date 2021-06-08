@@ -38,6 +38,8 @@ export interface Question {
   answerType: 'text' | 'image';
 }
 
+export type QuestionWithoutAnswer = Omit<Question, 'answer'>
+
 export interface ParseSiqResult {
   id: string;
   name: string;

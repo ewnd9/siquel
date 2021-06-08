@@ -1,5 +1,5 @@
 import React from 'react';
-import { LOGIN_TYPE } from 'shared/src';
+import { LOGIN_TYPE } from 'shared';
 
 import { Socket, SetState } from './types';
 
