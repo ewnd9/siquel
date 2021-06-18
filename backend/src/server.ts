@@ -264,11 +264,22 @@ async function initGame() {
     fs.mkdirSync(archiveDir, { recursive: true });
 
     for (const [mediaId, fileId] of Object.entries(media)) {
-      const file = files[fileId];
-      fs.writeFileSync(
-        `${archiveDir}/${mediaId}`,
-        await file.async('nodebuffer')
-      );
+      const id = fileId.replace(/@/g, ''); //
+      const file =
+        files[id] ||
+        Object.entries(files).find(([key]) => key.endsWith(`/${id}`))?.[1];
+
+      if (file) {
+        fs.writeFileSync(
+          `${archiveDir}/${mediaId}`,
+          await file.async('nodebuffer')
+        );
+      } else {
+        console.error(
+          `no file for ${id} (${fileId}), all files: ${Object.keys(files)}`
+        );
+        process.exit(1);
+      }
     }
   }
 
