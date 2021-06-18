@@ -1,6 +1,8 @@
 import { State } from 'shared';
 import omit from 'lodash/omit';
 
+import { mapRound } from './map-round';
+
 export interface OnAckQuestionAction {
   type: 'ACK_QUESTION';
   ack: boolean;
@@ -13,6 +15,7 @@ export function onAckQuestion(
   const { questionId } = state;
   const answer = state.game.questions[questionId].answer;
   const question = omit(state.game.questions[questionId], 'answer');
+  const round = mapRound({ state, roundId: state.roundId });
 
   if (action.ack) {
     const players = {
@@ -39,6 +42,7 @@ export function onAckQuestion(
       ...nextState,
       playerView: {
         type: 'SHOW_ANSWER_VIEW',
+        round,
         question,
         answer,
       },
@@ -61,6 +65,7 @@ export function onAckQuestion(
       },
       playerView: {
         type: 'SHOW_QUESTION_VIEW',
+        round,
         question,
       },
       ownerView: {

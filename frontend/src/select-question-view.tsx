@@ -22,11 +22,11 @@ export const SelectQuestionView = ({
         <tbody>
           {state.round.themes.map((theme, index) => (
             <tr key={index}>
-              <td className="w-2/5">{theme.name}</td>
+              <td className="w-2/5 p-3 p-3 border">{theme.name}</td>
               {theme.questions.map((question, index) => (
                 <td
                   key={index}
-                  className="text-right font-mono"
+                  className="text-center border p-3 font-mono"
                   onClick={() => {
                     if (state.type === 'OWNER_SELECT_QUESTION_VIEW') {
                       return;

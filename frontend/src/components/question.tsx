@@ -18,7 +18,7 @@ export const Question = ({ state, meta }) => {
           autoPlay
         />
       ) : state.question.question.type === 'text' ? (
-        <div>{state.question.question.text}</div>
+        <div>Question: {state.question.question.text}</div>
       ) : (
         JSON.stringify(state.question, null, 2)
       )}

@@ -9,6 +9,7 @@ import {
 import { SetState, Socket } from './types';
 import { Question } from './components/question';
 import { Answering } from './components/answering';
+import { Button } from './components/button';
 
 export const OwnerShowQuestionView = ({
   io,
@@ -32,8 +33,8 @@ export const OwnerShowQuestionView = ({
       ) : null}
       <div>Answer: {state.answer}</div>
       {(state.type === 'OWNER_SHOW_QUESTION_ANSWERING_VIEW' && (
-        <div>
-          <button
+        <div className="mt-3">
+          <Button
             onClick={() => {
               io.emit('ACK_QUESTION', { ack: true }, (state) =>
                 setState(state)
@@ -41,8 +42,9 @@ export const OwnerShowQuestionView = ({
             }}
           >
             correct
-          </button>
-          <button
+          </Button>
+          <Button
+            className="ml-3"
             onClick={() => {
               io.emit('ACK_QUESTION', { ack: false }, (state) =>
                 setState(state)
@@ -50,17 +52,17 @@ export const OwnerShowQuestionView = ({
             }}
           >
             not correct
-          </button>
+          </Button>
         </div>
       )) || (
-        <div>
-          <button
+        <div className="mt-3">
+          <Button
             onClick={() => {
               io.emit('SKIP_QUESTION', {}, (state) => setState(state));
             }}
           >
             skip question
-          </button>
+          </Button>
         </div>
       )}
     </div>

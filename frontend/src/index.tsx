@@ -20,7 +20,7 @@ const App = () => {
   }
 
   return (
-    <div className="max-w-lg mt-20 p-5 mx-auto bg-white">
+    <div className="max-w-screen-md mt-20 p-5 mx-auto bg-white">
       <h1>Siquel Game</h1>
       <div className="mt-3">
         <Game
@@ -29,7 +29,7 @@ const App = () => {
           state={state.playerView}
           setState={setState}
         />
-        {state.metaView ? <PlayerStats state={state.metaView} /> : null}
+        {state?.metaView ? <PlayerStats state={state.metaView} /> : null}
         {/* <img
         src="/static/gifs/correct/snoop-dog.gif"
         style={{

@@ -1,6 +1,8 @@
 import { State } from 'shared';
 import omit from 'lodash/omit';
 
+import { mapRound } from './map-round';
+
 export interface OnSkipQuestionAction {
   type: 'SKIP_QUESTION';
 }
@@ -12,6 +14,7 @@ export function onSkipQuestion(
   const { questionId } = state;
   const answer = state.game.questions[questionId].answer;
   const question = omit(state.game.questions[questionId], 'answer');
+  const round = mapRound({ state, roundId: state.roundId });
 
   const answered = {
     ...state.answered,
@@ -29,6 +32,7 @@ export function onSkipQuestion(
     ...nextState,
     playerView: {
       type: 'SHOW_ANSWER_VIEW',
+      round,
       question,
       answer,
     },

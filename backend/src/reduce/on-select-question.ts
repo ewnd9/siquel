@@ -1,6 +1,8 @@
 import { State } from 'shared';
 import omit from 'lodash/omit';
 
+import { mapRound } from './map-round';
+
 export interface OnSelectQuestionAction {
   type: 'SELECT_QUESTION';
   id: string;
@@ -10,6 +12,7 @@ export function onSelectQuestion(state: State, action: OnSelectQuestionAction): 
   const questionId = action.id;
   const answer = state.game.questions[questionId].answer;
   const question = omit(state.game.questions[questionId], 'answer');
+  const round = mapRound({ state, roundId: state.roundId });
 
   return {
     ...state,
@@ -17,6 +20,7 @@ export function onSelectQuestion(state: State, action: OnSelectQuestionAction): 
     answers: {},
     playerView: {
       type: 'SHOW_QUESTION_VIEW',
+      round,
       question,
     },
     ownerView: {
