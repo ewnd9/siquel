@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import ReactAudioPlayer from 'react-audio-player';
 
 export const Question = ({ state, meta }) => {
   return (
@@ -11,11 +12,10 @@ export const Question = ({ state, meta }) => {
           )}`}
         />
       ) : state.question.question.type === 'voice' ? (
-        <audio
+        <Audio
           src={`/api/v1/static/${meta.roomId}/${encodeURIComponent(
             state.question.question.fileId
           )}`}
-          autoPlay
         />
       ) : state.question.question.type === 'text' ? (
         <div>Question: {state.question.question.text}</div>
@@ -24,4 +24,8 @@ export const Question = ({ state, meta }) => {
       )}
     </div>
   );
+};
+
+const Audio = ({ src }) => {
+  return <ReactAudioPlayer src={src} autoPlay controls />;
 };
